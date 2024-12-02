@@ -2,12 +2,12 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 
-// Create an Express app
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Serve static files from the "public" directory
+let users = [];
+
 app.use(express.static("public"));
 
 // Handle a basic route
@@ -50,6 +50,12 @@ io.on("connection", (socket) => {
     }
   });
 
+  // Handle chat messages
+  socket.on("message", (msg) => {
+    console.log(`Message received from ${socket.id}: ${msg}`);
+    socket.broadcast.emit("message", msg);
+  });
+
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
@@ -61,7 +67,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start the server
 const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
